@@ -27,7 +27,7 @@ namespace BookStoreApi.Mappers
                 Isbn = bookDto.Isbn,
                 Title = bookDto.Title,
                 Author = bookDto.Author,
-                Status = bookDto.Status
+                Status = BookStatus.Status.Available
             };
         }
     }
