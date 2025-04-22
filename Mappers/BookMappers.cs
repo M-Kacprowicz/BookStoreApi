@@ -13,7 +13,7 @@ namespace BookStoreApi.Mappers
         {
             return new BookDto
             {
-                Isbn = bookModel.Isbn,
+                Id = bookModel.Id,
                 Title = bookModel.Title,
                 Author = bookModel.Author,
                 Status = bookModel.Status
