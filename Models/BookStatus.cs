@@ -7,10 +7,10 @@ namespace BookStoreApi.Models
 {
     public class BookStatus
     {
-        public string Available { get; } = "Available";
-        public string Borrowed { get; } = "Borrowed";
-        public string Returned { get; } = "Returned";
-        public string Damaged { get; } = "Damaged";
+        public string Available { get; } = "available";
+        public string Borrowed { get; } = "borrowed";
+        public string Returned { get; } = "returned";
+        public string Damaged { get; } = "damaged";
 
         private BookStatus() {}
         public static readonly BookStatus Status = new BookStatus();
