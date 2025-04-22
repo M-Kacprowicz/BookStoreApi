@@ -19,5 +19,16 @@ namespace BookStoreApi.Mappers
                 Status = bookModel.Status
             };
         }
+
+        public static Book ToBookFromCreateDto(this CreateBookRequestDto bookDto)
+        {
+            return new Book
+            {
+                Isbn = bookDto.Isbn,
+                Title = bookDto.Title,
+                Author = bookDto.Author,
+                Status = bookDto.Status
+            };
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BookStoreApi.Data;
+using BookStoreApi.Dtos.Book;
 using BookStoreApi.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,6 +38,15 @@ namespace BookStoreApi.Controllers
             }
 
             return Ok(book.ToBookDto());
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] CreateBookRequestDto bookDto)
+        {
+            var bookModel = bookDto.ToBookFromCreateDto();
+            _context.Books.Add(bookModel);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetById), new { id = bookModel.Id }, bookModel.ToBookDto());
         }
     }
 }
