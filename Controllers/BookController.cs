@@ -52,7 +52,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("updatebook/{id}")]
         public IActionResult Update([FromRoute] int id, [FromBody] UpdateBookRequestDto updateDto)
         {
             var bookModel = _context.Books.FirstOrDefault(x => x.Id == id);
@@ -65,7 +65,74 @@ namespace BookStoreApi.Controllers
             bookModel.Author = updateDto.Author;
             bookModel.Title = updateDto.Title;
             bookModel.Isbn = updateDto.Isbn;
-            bookModel.Status = updateDto.Status;
+
+            _context.SaveChanges();
+
+            return Ok(bookModel);
+        }
+
+        [HttpPut]
+        [Route("updatestatus/{id}")]
+        public IActionResult UpdateStatus([FromRoute] int id, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
+        {
+            var bookModel = _context.Books.FirstOrDefault(x => x.Id == id);
+
+            if (bookModel == null)
+            {
+                return NotFound();
+            }
+
+            string newStatus = updateStatusDto.Status.ToLower();
+            string oldStatus = bookModel.Status.ToLower();
+
+            if (newStatus == BookStatus.Status.Available)
+            {
+                if (oldStatus == BookStatus.Status.Returned || oldStatus == BookStatus.Status.Damaged)
+                {
+                    bookModel.Status = newStatus;
+                }
+                else
+                {
+                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Returned} or {BookStatus.Status.Damaged}.");
+                }
+            }
+            else if (newStatus == BookStatus.Status.Borrowed)
+            {
+                if (oldStatus == BookStatus.Status.Available)
+                {
+                    bookModel.Status = newStatus;
+                }
+                else
+                {
+                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Available}.");
+                }
+            }
+            else if (newStatus == BookStatus.Status.Returned)
+            {
+                if (oldStatus == BookStatus.Status.Borrowed)
+                {
+                    bookModel.Status = newStatus;
+                }
+                else
+                {
+                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Borrowed}.");
+                }
+            }
+            else if (newStatus == BookStatus.Status.Damaged)
+            {
+                if (oldStatus == BookStatus.Status.Available || oldStatus == BookStatus.Status.Returned)
+                {
+                    bookModel.Status = newStatus;
+                }
+                else
+                {
+                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Available} or {BookStatus.Status.Returned}.");
+                }
+            }
+            else
+            {
+                return BadRequest($"Request could not be processed. Possible statuses to be set: {BookStatus.Status.Available}, {BookStatus.Status.Borrowed}, {BookStatus.Status.Damaged}, {BookStatus.Status.Returned}");
+            }
 
             _context.SaveChanges();
 
