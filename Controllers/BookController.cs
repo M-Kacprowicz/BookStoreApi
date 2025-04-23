@@ -136,7 +136,25 @@ namespace BookStoreApi.Controllers
 
             _context.SaveChanges();
 
-            return Ok(bookModel);
+            return Ok(bookModel.ToBookDto());
+        }
+
+        [HttpDelete]
+        [Route("deleteBook/{bookId}")]
+        public IActionResult Delete([FromRoute] int bookId)
+        {
+            var bookModel = _context.Books.FirstOrDefault(x => x.Id == bookId);
+
+            if (bookModel == null)
+            {
+                return NotFound();
+            }
+
+            _context.Books.Remove(bookModel);
+
+            _context.SaveChanges();
+
+            return NoContent();
         }
     }
 }
