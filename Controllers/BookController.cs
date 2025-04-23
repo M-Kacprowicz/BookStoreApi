@@ -52,10 +52,10 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPut]
-        [Route("updateBookInfo/{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateBookRequestDto updateDto)
+        [Route("updateBookInfo/{bookId}")]
+        public IActionResult Update([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
         {
-            var bookModel = _context.Books.FirstOrDefault(x => x.Id == id);
+            var bookModel = _context.Books.FirstOrDefault(x => x.Id == bookId);
 
             if (bookModel == null)
             {
