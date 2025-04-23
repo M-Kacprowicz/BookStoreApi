@@ -7,6 +7,7 @@ using BookStoreApi.Dtos.Book;
 using BookStoreApi.Mappers;
 using BookStoreApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApi.Controllers
 {
@@ -21,18 +22,20 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAllAsync()
         {
-            var books = _context.Books.ToList().Select(s => s.ToBookDto());
+            var books = await _context.Books.ToListAsync();
+
+            var bookDto = books.Select(s => s.ToBookDto());
 
             return Ok(books);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
         {
-            var book = _context.Books.Find(id);
+            var book = await _context.Books.FindAsync(id);
 
             if (book == null)
             {
@@ -43,19 +46,19 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateBookRequestDto bookDto)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateBookRequestDto bookDto)
         {
             var bookModel = bookDto.ToBookFromCreateDto();
-            _context.Books.Add(bookModel);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = bookModel.Id }, bookModel);
+            await _context.Books.AddAsync(bookModel);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = bookModel.Id }, bookModel);
         }
 
         [HttpPut]
         [Route("updateBookInfo/{bookId}")]
-        public IActionResult Update([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
+        public async Task<IActionResult> UpdateAsync([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
         {
-            var bookModel = _context.Books.FirstOrDefault(x => x.Id == bookId);
+            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
 
             if (bookModel == null)
             {
@@ -66,16 +69,16 @@ namespace BookStoreApi.Controllers
             bookModel.Title = updateDto.Title;
             bookModel.Isbn = updateDto.Isbn;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(bookModel);
         }
 
         [HttpPut]
         [Route("updateBookStatus/{bookId}")]
-        public IActionResult UpdateStatus([FromRoute] int bookId, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
+        public async Task<IActionResult> UpdateStatusAsync([FromRoute] int bookId, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
         {
-            var bookModel = _context.Books.FirstOrDefault(x => x.Id == bookId);
+            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
 
             if (bookModel == null)
             {
@@ -134,16 +137,16 @@ namespace BookStoreApi.Controllers
                 return BadRequest($"Request could not be processed. Possible statuses to be set: {BookStatus.Status.Available}, {BookStatus.Status.Borrowed}, {BookStatus.Status.Damaged}, {BookStatus.Status.Returned}");
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(bookModel.ToBookDto());
         }
 
         [HttpDelete]
         [Route("deleteBook/{bookId}")]
-        public IActionResult Delete([FromRoute] int bookId)
+        public async Task<IActionResult> DeleteAsync([FromRoute] int bookId)
         {
-            var bookModel = _context.Books.FirstOrDefault(x => x.Id == bookId);
+            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
 
             if (bookModel == null)
             {
@@ -152,7 +155,7 @@ namespace BookStoreApi.Controllers
 
             _context.Books.Remove(bookModel);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
