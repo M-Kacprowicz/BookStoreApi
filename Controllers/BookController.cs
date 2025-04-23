@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStoreApi.Data;
 using BookStoreApi.Dtos.Book;
+using BookStoreApi.Interfaces;
 using BookStoreApi.Mappers;
 using BookStoreApi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -16,26 +17,29 @@ namespace BookStoreApi.Controllers
     public class BookController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
-        public BookController(ApplicationDBContext context)
+        private readonly IBookRepository _bookRepo;
+        public BookController(ApplicationDBContext context, IBookRepository bookRepo)
         {
+            _bookRepo = bookRepo;
             _context = context;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            var books = await _context.Books.ToListAsync();
+            var books = await _bookRepo.GetAllAsync();
 
-            var bookDto = books.Select(s => s.ToBookDto());
+            var booksDto = books.Select(s => s.ToBookDto());
 
-            return Ok(books);
+            return Ok(booksDto);
         }
 
+        [ActionName(nameof(GetByIdAsync))]
         [HttpGet]
-        [Route("{id}")]
-        public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
+        [Route("{bookId}")]
+        public async Task<IActionResult> GetByIdAsync([FromRoute] int bookId)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _bookRepo.GetByIdAsync(bookId);
 
             if (book == null)
             {
@@ -49,27 +53,20 @@ namespace BookStoreApi.Controllers
         public async Task<IActionResult> CreateAsync([FromBody] CreateBookRequestDto bookDto)
         {
             var bookModel = bookDto.ToBookFromCreateDto();
-            await _context.Books.AddAsync(bookModel);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = bookModel.Id }, bookModel);
+            await _bookRepo.CreateAsync(bookModel);
+            return CreatedAtAction(nameof(GetByIdAsync), new { bookId = bookModel.Id }, bookModel);
         }
 
         [HttpPut]
         [Route("updateBookInfo/{bookId}")]
-        public async Task<IActionResult> UpdateAsync([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
+        public async Task<IActionResult> UpdateBookInfoAsync([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
         {
-            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
+            var bookModel = await _bookRepo.UpdateBookInfoAsync(bookId, updateDto);
 
             if (bookModel == null)
             {
                 return NotFound();
             }
-
-            bookModel.Author = updateDto.Author;
-            bookModel.Title = updateDto.Title;
-            bookModel.Isbn = updateDto.Isbn;
-
-            await _context.SaveChangesAsync();
 
             return Ok(bookModel);
         }
@@ -78,84 +75,37 @@ namespace BookStoreApi.Controllers
         [Route("updateBookStatus/{bookId}")]
         public async Task<IActionResult> UpdateStatusAsync([FromRoute] int bookId, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
         {
-            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
+            try
+            {
+                var bookModel = await _bookRepo.UpdateBookStatusAsync(bookId, updateStatusDto);
 
-            if (bookModel == null)
-            {
-                return NotFound();
-            }
+                if (bookModel == null)
+                {
+                    return NotFound();
+                }
 
-            string newStatus = updateStatusDto.Status.ToLower();
-            string oldStatus = bookModel.Status.ToLower();
-
-            if (newStatus == BookStatus.Status.Available)
-            {
-                if (oldStatus == BookStatus.Status.Returned || oldStatus == BookStatus.Status.Damaged)
-                {
-                    bookModel.Status = newStatus;
-                }
-                else
-                {
-                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Returned} or {BookStatus.Status.Damaged}.");
-                }
+                return Ok(bookModel.ToBookDto());
             }
-            else if (newStatus == BookStatus.Status.Borrowed)
+            catch (ArgumentException ex)
             {
-                if (oldStatus == BookStatus.Status.Available)
-                {
-                    bookModel.Status = newStatus;
-                }
-                else
-                {
-                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Available}.");
-                }
+                return UnprocessableEntity(ex.Message);
             }
-            else if (newStatus == BookStatus.Status.Returned)
+            catch (Exception exc)
             {
-                if (oldStatus == BookStatus.Status.Borrowed)
-                {
-                    bookModel.Status = newStatus;
-                }
-                else
-                {
-                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Borrowed}.");
-                }
+                return BadRequest(exc.Message);
             }
-            else if (newStatus == BookStatus.Status.Damaged)
-            {
-                if (oldStatus == BookStatus.Status.Available || oldStatus == BookStatus.Status.Returned)
-                {
-                    bookModel.Status = newStatus;
-                }
-                else
-                {
-                    return UnprocessableEntity($"Request could not be processed. Status {newStatus} can only be set if previous status was {BookStatus.Status.Available} or {BookStatus.Status.Returned}.");
-                }
-            }
-            else
-            {
-                return BadRequest($"Request could not be processed. Possible statuses to be set: {BookStatus.Status.Available}, {BookStatus.Status.Borrowed}, {BookStatus.Status.Damaged}, {BookStatus.Status.Returned}");
-            }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(bookModel.ToBookDto());
         }
 
         [HttpDelete]
         [Route("deleteBook/{bookId}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] int bookId)
         {
-            var bookModel = await _context.Books.FirstOrDefaultAsync(x => x.Id == bookId);
+            var bookModel = await _bookRepo.DeleteAsync(bookId);
 
             if (bookModel == null)
             {
                 return NotFound();
             }
-
-            _context.Books.Remove(bookModel);
-
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
