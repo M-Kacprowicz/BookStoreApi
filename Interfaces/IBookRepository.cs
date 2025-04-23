@@ -15,5 +15,6 @@ namespace BookStoreApi.Interfaces
         Task<Book?> UpdateBookInfoAsync(int id, UpdateBookRequestDto bookDto);
         Task<Book?> UpdateBookStatusAsync(int id, UpdateBookStatusRequestDto bookStatusDto);
         Task<Book?> DeleteAsync(int id);
+        Task<List<Book>> GetByAuthorAsync(string author);
     }
 }

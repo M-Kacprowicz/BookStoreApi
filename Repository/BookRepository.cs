@@ -47,6 +47,20 @@ namespace BookStoreApi.Repository
             return await _context.Books.ToListAsync();
         }
 
+        public async Task<List<Book>> GetByAuthorAsync(string author)
+        {
+            var booksFiltered = await _context.Books.Where(x => x.Author.ToLower().Contains(author.ToLower())).ToListAsync();
+
+            if (booksFiltered.Count > 0)
+            {
+                return booksFiltered;
+            }
+            else
+            {
+                throw new NullReferenceException($"Could not find any books with Author like {author}.");
+            }
+        }
+
         public async Task<Book?> GetByIdAsync(int id)
         {
             return await _context.Books.FindAsync(id);
