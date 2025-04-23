@@ -16,12 +16,10 @@ namespace BookStoreApi.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
         private readonly IBookRepository _bookRepo;
-        public BookController(ApplicationDBContext context, IBookRepository bookRepo)
+        public BookController(IBookRepository bookRepo)
         {
             _bookRepo = bookRepo;
-            _context = context;
         }
 
         [HttpGet]
