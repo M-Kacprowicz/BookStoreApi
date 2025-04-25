@@ -8,6 +8,7 @@ using BookStoreApi.Dtos.Book;
 using BookStoreApi.Interfaces;
 using BookStoreApi.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BookStoreApi.Repository
 {
@@ -75,9 +76,11 @@ namespace BookStoreApi.Repository
                 return null;
             }
 
-            bookModel.Author = bookDto.Author;
-            bookModel.Title = bookDto.Title;
-            bookModel.Isbn = bookDto.Isbn;
+            if (!bookDto.Author.IsNullOrEmpty() && bookDto.Author != "string")
+                bookModel.Author = bookDto.Author;
+
+            if (!bookDto.Title.IsNullOrEmpty() && bookDto.Title != "string")
+                bookModel.Title = bookDto.Title;
 
             await _context.SaveChangesAsync();
 
