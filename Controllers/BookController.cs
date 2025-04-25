@@ -34,7 +34,7 @@ namespace BookStoreApi.Controllers
 
         [ActionName(nameof(GetByIdAsync))]
         [HttpGet]
-        [Route("{bookId}")]
+        [Route("{bookId:int}")]
         public async Task<IActionResult> GetByIdAsync([FromRoute] int bookId)
         {
             var book = await _bookRepo.GetByIdAsync(bookId);
@@ -48,7 +48,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpGet]
-        [Route("getByAuthor/{author}")]
+        [Route("getByAuthor/{author:string}")]
         public async Task<IActionResult> GetByAuthorAsync([FromRoute] string author)
         {
             try
@@ -72,7 +72,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPut]
-        [Route("updateBookInfo/{bookId}")]
+        [Route("updateBookInfo/{bookId:int}")]
         public async Task<IActionResult> UpdateBookInfoAsync([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
         {
             var bookModel = await _bookRepo.UpdateBookInfoAsync(bookId, updateDto);
@@ -86,7 +86,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpPut]
-        [Route("updateBookStatus/{bookId}")]
+        [Route("updateBookStatus/{bookId:int}")]
         public async Task<IActionResult> UpdateStatusAsync([FromRoute] int bookId, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
         {
             try
@@ -111,7 +111,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpDelete]
-        [Route("deleteBook/{bookId}")]
+        [Route("deleteBook/{bookId:int}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] int bookId)
         {
             var bookModel = await _bookRepo.DeleteAsync(bookId);
