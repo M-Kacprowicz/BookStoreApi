@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStoreApi.Data;
 using BookStoreApi.Dtos.Book;
+using BookStoreApi.Helpers;
 using BookStoreApi.Interfaces;
 using BookStoreApi.Mappers;
 using BookStoreApi.Models;
@@ -23,12 +24,12 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] QueryBooks query)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var books = await _bookRepo.GetAllAsync();
+            var books = await _bookRepo.GetAllAsync(query);
 
             var booksDto = books.Select(s => s.ToBookDto());
 

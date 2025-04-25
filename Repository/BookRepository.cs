@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStoreApi.Data;
 using BookStoreApi.Dtos.Book;
+using BookStoreApi.Helpers;
 using BookStoreApi.Interfaces;
 using BookStoreApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -43,9 +44,21 @@ namespace BookStoreApi.Repository
             return bookModel;
         }
 
-        public async Task<List<Book>> GetAllAsync()
+        public async Task<List<Book>> GetAllAsync(QueryBooks query)
         {
-            return await _context.Books.ToListAsync();
+            var books = _context.Books.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.Author))
+            {
+                books = books.Where(b => b.Author.ToLower().Contains(query.Author.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Title))
+            {
+                books = books.Where(b => b.Title.ToLower().Contains(query.Title.ToLower()));
+            }
+
+            return await books.ToListAsync();
         }
 
         public async Task<List<Book>> GetByAuthorAsync(string author)
