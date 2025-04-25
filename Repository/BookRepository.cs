@@ -75,6 +75,12 @@ namespace BookStoreApi.Repository
                 books = query.IsDescending ? books.OrderByDescending(b => b.Id) : books.OrderBy(b => b.Id);
             }
 
+            if (query.IsPaginated)
+            {
+                var skipNumber = (query.PageNumber - 1) * query.PageSize;
+                return await books.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            }
+
             return await books.ToListAsync();
         }
 
