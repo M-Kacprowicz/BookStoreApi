@@ -25,6 +25,9 @@ namespace BookStoreApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var books = await _bookRepo.GetAllAsync();
 
             var booksDto = books.Select(s => s.ToBookDto());
@@ -37,6 +40,9 @@ namespace BookStoreApi.Controllers
         [Route("{bookId:int}")]
         public async Task<IActionResult> GetByIdAsync([FromRoute] int bookId)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var book = await _bookRepo.GetByIdAsync(bookId);
 
             if (book == null)
@@ -51,6 +57,9 @@ namespace BookStoreApi.Controllers
         [Route("getByAuthor/{author:alpha}")]
         public async Task<IActionResult> GetByAuthorAsync([FromRoute] string author)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 var books = await _bookRepo.GetByAuthorAsync(author);
@@ -78,6 +87,9 @@ namespace BookStoreApi.Controllers
         [Route("updateBookInfo/{bookId:int}")]
         public async Task<IActionResult> UpdateBookInfoAsync([FromRoute] int bookId, [FromBody] UpdateBookRequestDto updateDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var bookModel = await _bookRepo.UpdateBookInfoAsync(bookId, updateDto);
 
             if (bookModel == null)
@@ -92,6 +104,9 @@ namespace BookStoreApi.Controllers
         [Route("updateBookStatus/{bookId:int}")]
         public async Task<IActionResult> UpdateStatusAsync([FromRoute] int bookId, [FromBody] UpdateBookStatusRequestDto updateStatusDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 var bookModel = await _bookRepo.UpdateBookStatusAsync(bookId, updateStatusDto);
@@ -117,6 +132,9 @@ namespace BookStoreApi.Controllers
         [Route("deleteBook/{bookId:int}")]
         public async Task<IActionResult> DeleteAsync([FromRoute] int bookId)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             var bookModel = await _bookRepo.DeleteAsync(bookId);
 
             if (bookModel == null)
