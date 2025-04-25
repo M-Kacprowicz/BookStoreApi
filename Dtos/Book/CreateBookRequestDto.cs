@@ -10,7 +10,7 @@ namespace BookStoreApi.Dtos.Book
     public class CreateBookRequestDto
     {
         [Required]
-        [Length(13, 13, ErrorMessage = "Isbn must be 13 digits number")]
+        [Range(1000000000000, 9999999999999, ErrorMessage = "Isbn must be a 13 digits number")]
         public ulong Isbn { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Author { get; set; } = string.Empty;

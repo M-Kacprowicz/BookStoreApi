@@ -48,7 +48,7 @@ namespace BookStoreApi.Controllers
         }
 
         [HttpGet]
-        [Route("getByAuthor/{author:string}")]
+        [Route("getByAuthor/{author:alpha}")]
         public async Task<IActionResult> GetByAuthorAsync([FromRoute] string author)
         {
             try
@@ -66,6 +66,9 @@ namespace BookStoreApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateBookRequestDto bookDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var bookModel = bookDto.ToBookFromCreateDto();
             await _bookRepo.CreateAsync(bookModel);
             return CreatedAtAction(nameof(GetByIdAsync), new { bookId = bookModel.Id }, bookModel);
