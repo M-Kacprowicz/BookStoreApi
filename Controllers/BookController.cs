@@ -54,25 +54,6 @@ namespace BookStoreApi.Controllers
             return Ok(book);
         }
 
-        [HttpGet]
-        [Route("getByAuthor/{author:alpha}")]
-        public async Task<IActionResult> GetByAuthorAsync([FromRoute] string author)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            try
-            {
-                var books = await _bookRepo.GetByAuthorAsync(author);
-                var booksDto = books.Select(s => s.ToBookDto());
-                return Ok(booksDto);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
         [HttpPost]
         public async Task<IActionResult> CreateAsync([FromBody] CreateBookRequestDto bookDto)
         {
