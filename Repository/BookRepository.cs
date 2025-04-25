@@ -58,6 +58,23 @@ namespace BookStoreApi.Repository
                 books = books.Where(b => b.Title.ToLower().Contains(query.Title.ToLower()));
             }
 
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("Author", StringComparison.OrdinalIgnoreCase))
+                {
+                    books = query.IsDescending ? books.OrderByDescending(b => b.Author) : books.OrderBy(b => b.Author);
+                }
+                
+                if (query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase))
+                {
+                    books = query.IsDescending ? books.OrderByDescending(b => b.Title) : books.OrderBy(b => b.Title);
+                }
+            }
+            else
+            {
+                books = query.IsDescending ? books.OrderByDescending(b => b.Id) : books.OrderBy(b => b.Id);
+            }
+
             return await books.ToListAsync();
         }
 
